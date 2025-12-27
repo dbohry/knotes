@@ -270,15 +270,6 @@ function showNoteId(id) {
     }
 }
 
-function hideNoteId() {
-    const noteIdDisplay = document.getElementById('noteIdDisplay');
-    if (noteIdDisplay) {
-        noteIdDisplay.style.display = 'none';
-    } else {
-        console.error('Element with ID "noteIdDisplay" not found in hideNoteId');
-    }
-}
-
 async function copyNoteLink() {
     try {
         const noteIdDisplay = document.getElementById('noteIdDisplay');
