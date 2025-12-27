@@ -28,8 +28,8 @@ public class NoteController {
 
     @GetMapping("{id}/metadata")
     public ResponseEntity<NoteMetadata> getMetadata(@PathVariable String id) {
-        Note note = service.findById(id);
-        return ResponseEntity.ok().body(NoteMetadata.from(note));
+        NoteMetadata metadata = service.findMetadataById(id);
+        return ResponseEntity.ok().body(metadata);
     }
 
     @PostMapping

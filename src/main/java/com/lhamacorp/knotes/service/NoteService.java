@@ -2,6 +2,7 @@ package com.lhamacorp.knotes.service;
 
 import com.github.f4b6a3.ulid.Ulid;
 import com.github.f4b6a3.ulid.UlidCreator;
+import com.lhamacorp.knotes.api.dto.NoteMetadata;
 import com.lhamacorp.knotes.domain.Note;
 import com.lhamacorp.knotes.exception.NotFoundException;
 import com.lhamacorp.knotes.repository.NoteRepository;
@@ -33,6 +34,12 @@ public class NoteService {
     public Note findById(String id) {
         return repository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Note with id " + id + " not found!"));
+    }
+
+    public NoteMetadata findMetadataById(String id) {
+        Note noteProjection = repository.findMetadataProjectionById(id)
+                .orElseThrow(() -> new NotFoundException("Note with id " + id + " not found!"));
+        return NoteMetadata.from(noteProjection);
     }
 
     public Note save(String content) {
