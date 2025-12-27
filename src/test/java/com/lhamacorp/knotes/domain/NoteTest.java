@@ -23,8 +23,8 @@ class NoteTest {
         assertEquals(now, note.modifiedAt());
 
         // Verify that content is actually stored compressed
-        assertNotNull(note.compressedContent());
-        assertTrue(note.compressedContent().getData().length > 0);
+        assertNotNull(note.compressedData());
+        assertTrue(note.compressedData().getData().length > 0);
     }
 
     @Test
@@ -39,7 +39,7 @@ class NoteTest {
         // Then
         assertEquals(id, note.id());
         assertNull(note.content());
-        assertNull(note.compressedContent());
+        assertNull(note.compressedData());
     }
 
     @Test

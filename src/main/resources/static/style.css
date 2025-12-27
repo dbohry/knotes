@@ -67,6 +67,30 @@ body {
     font-size: 18px;
     color: var(--text-primary);
     font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.title img {
+    height: 28px;
+    width: 28px;
+    border-radius: 6px;
+    vertical-align: middle;
+    flex-shrink: 0;
+    object-fit: contain;
+    background: var(--bg-tertiary);
+    transition: all 0.3s ease;
+}
+
+/* Fallback when logo fails to load */
+.title img[alt]:empty::before,
+.title img[alt]:not([src])::before {
+    content: "📝";
+    display: block;
+    font-size: 16px;
+    text-align: center;
+    line-height: 28px;
 }
 
 .note-id {
@@ -249,6 +273,13 @@ body {
     .title {
         font-size: 16px;
         font-weight: 600;
+        gap: 6px;
+    }
+
+    .title img {
+        height: 24px;
+        width: 24px;
+        border-radius: 4px;
     }
 
     .header-right {
@@ -358,6 +389,13 @@ body {
 
     .title {
         font-size: 18px;
+        gap: 7px;
+    }
+
+    .title img {
+        height: 26px;
+        width: 26px;
+        border-radius: 5px;
     }
 
     .note-area {
@@ -395,6 +433,13 @@ body {
 
     .title {
         font-size: 20px;
+        gap: 8px;
+    }
+
+    .title img {
+        height: 28px;
+        width: 28px;
+        border-radius: 6px;
     }
 
     .note-area {
@@ -417,6 +462,13 @@ body {
 
     .title {
         font-size: 22px;
+        gap: 10px;
+    }
+
+    .title img {
+        height: 32px;
+        width: 32px;
+        border-radius: 7px;
     }
 
     .note-area {
@@ -486,6 +538,13 @@ body {
 
     .title {
         font-size: 14px;
+        gap: 4px;
+    }
+
+    .title img {
+        height: 20px;
+        width: 20px;
+        border-radius: 3px;
     }
 
     .new-btn {
