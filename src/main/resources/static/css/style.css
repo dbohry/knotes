@@ -1,24 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap');
 
-/* CSS Variables for Theme Support */
+/* CSS Variables for Theme Support - Dark Theme Default */
 :root {
-    --bg-primary: #fafafa;
-    --bg-secondary: white;
-    --bg-tertiary: #f5f5f5;
-    --text-primary: #333;
-    --text-secondary: #666;
-    --text-tertiary: #999;
-    --border-primary: #e0e0e0;
-    --border-secondary: #ddd;
-    --accent-primary: #007bff;
-    --accent-primary-hover: #0056b3;
-    --accent-secondary: #6c757d;
-    --overlay-bg: rgba(0,0,0,0.5);
-    --shadow: rgba(0,0,0,0.3);
-}
-
-/* Dark Theme Variables */
-[data-theme="dark"] {
     --bg-primary: #1a1a1a;
     --bg-secondary: #2d2d2d;
     --bg-tertiary: #404040;
@@ -32,6 +15,23 @@
     --accent-secondary: #868e96;
     --overlay-bg: rgba(0,0,0,0.7);
     --shadow: rgba(0,0,0,0.5);
+}
+
+/* Light Theme Variables */
+[data-theme="light"] {
+    --bg-primary: #fafafa;
+    --bg-secondary: white;
+    --bg-tertiary: #f5f5f5;
+    --text-primary: #333;
+    --text-secondary: #666;
+    --text-tertiary: #999;
+    --border-primary: #e0e0e0;
+    --border-secondary: #ddd;
+    --accent-primary: #007bff;
+    --accent-primary-hover: #0056b3;
+    --accent-secondary: #6c757d;
+    --overlay-bg: rgba(0,0,0,0.5);
+    --shadow: rgba(0,0,0,0.3);
 }
 
 * {

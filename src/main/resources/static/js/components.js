@@ -71,4 +71,7 @@ async function initPage(pageType) {
     if (typeof initializeTheme === 'function') {
         initializeTheme();
     }
+
+    // Ensure theme switch state is correct after components load
+    updateThemeSwitchState();
 }

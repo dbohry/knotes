@@ -8,23 +8,41 @@ const VERSION_CHECK_INTERVAL_MS = 5000;
 
 // Theme management
 function initializeTheme() {
-    // Get saved theme preference or default to light
-    const savedTheme = localStorage.getItem('theme') || 'light';
+    // Get saved theme preference or default to dark
+    const savedTheme = localStorage.getItem('theme') || 'dark';
     const body = document.body;
-    const themeSwitch = document.getElementById('themeSwitch');
 
-    if (!themeSwitch) return;
-
-    // Apply the theme
-    if (savedTheme === 'dark') {
-        body.setAttribute('data-theme', 'dark');
-        themeSwitch.classList.add('dark');
+    // Apply theme to body first (this works even if switch isn't loaded yet)
+    if (savedTheme === 'light') {
+        body.setAttribute('data-theme', 'light');
     } else {
         body.removeAttribute('data-theme');
-        themeSwitch.classList.remove('dark');
+    }
+
+    // Update theme switch if it exists
+    const themeSwitch = document.getElementById('themeSwitch');
+    if (themeSwitch) {
+        if (savedTheme === 'light') {
+            themeSwitch.classList.remove('dark');
+        } else {
+            themeSwitch.classList.add('dark');
+        }
     }
 
     updateThemeColor();
+}
+
+function updateThemeSwitchState() {
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    const themeSwitch = document.getElementById('themeSwitch');
+
+    if (themeSwitch) {
+        if (savedTheme === 'light') {
+            themeSwitch.classList.remove('dark');
+        } else {
+            themeSwitch.classList.add('dark');
+        }
+    }
 }
 
 function toggleTheme() {
@@ -36,16 +54,16 @@ function toggleTheme() {
     // Toggle between light and dark themes
     const currentTheme = body.getAttribute('data-theme');
 
-    if (currentTheme === 'dark') {
-        // Switch to light theme
-        body.removeAttribute('data-theme');
-        themeSwitch.classList.remove('dark');
-        localStorage.setItem('theme', 'light');
-    } else {
+    if (currentTheme === 'light') {
         // Switch to dark theme
-        body.setAttribute('data-theme', 'dark');
+        body.removeAttribute('data-theme');
         themeSwitch.classList.add('dark');
         localStorage.setItem('theme', 'dark');
+    } else {
+        // Switch to light theme
+        body.setAttribute('data-theme', 'light');
+        themeSwitch.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
     }
 
     // Update theme color for mobile browsers
@@ -144,10 +162,10 @@ function updateThemeColor() {
     const currentTheme = document.body.getAttribute('data-theme');
 
     if (themeColorMeta) {
-        if (currentTheme === 'dark') {
-            themeColorMeta.setAttribute('content', '#2d2d2d');
-        } else {
+        if (currentTheme === 'light') {
             themeColorMeta.setAttribute('content', '#007bff');
+        } else {
+            themeColorMeta.setAttribute('content', '#2d2d2d');
         }
     }
 }
