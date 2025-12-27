@@ -1,5 +1,6 @@
 package com.lhamacorp.knotes.api;
 
+import com.lhamacorp.knotes.api.dto.NoteMetadata;
 import com.lhamacorp.knotes.api.dto.NoteRequest;
 import com.lhamacorp.knotes.api.dto.NoteResponse;
 import com.lhamacorp.knotes.api.dto.NoteUpdateRequest;
@@ -23,6 +24,12 @@ public class NoteController {
     public ResponseEntity<NoteResponse> find(@PathVariable String id) {
         Note note = service.findById(id);
         return ResponseEntity.ok().body(NoteResponse.from(note));
+    }
+
+    @GetMapping("{id}/metadata")
+    public ResponseEntity<NoteMetadata> getMetadata(@PathVariable String id) {
+        Note note = service.findById(id);
+        return ResponseEntity.ok().body(NoteMetadata.from(note));
     }
 
     @PostMapping

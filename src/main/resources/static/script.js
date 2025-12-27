@@ -2,6 +2,9 @@ const API_BASE = '/api/notes';
 let currentNoteId = null;
 let autoSaveTimeout = null;
 let lastSavedContent = '';
+let currentNoteModifiedAt = null;
+let versionCheckInterval = null;
+const VERSION_CHECK_INTERVAL_MS = 5000;
 
 // Theme management
 function initializeTheme() {
@@ -184,7 +187,7 @@ async function autoSave(content) {
     try {
         if (currentNoteId) {
             // Update existing note
-            await fetch(API_BASE, {
+            const response = await fetch(API_BASE, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -194,6 +197,12 @@ async function autoSave(content) {
                     content: content
                 })
             });
+
+            if (response.ok) {
+                const updatedNote = await response.json();
+                // Update version tracking after successful save
+                setCurrentNoteVersion(updatedNote.modifiedAt);
+            }
         } else {
             // Create new note
             const response = await fetch(API_BASE, {
@@ -216,6 +225,9 @@ async function autoSave(content) {
 
                 // Show note ID in header
                 showNoteId(note.id);
+
+                // Set version tracking for new note
+                setCurrentNoteVersion(note.modifiedAt);
             }
         }
 
@@ -226,6 +238,9 @@ async function autoSave(content) {
 }
 
 async function loadNoteById(id) {
+    // Stop any existing version polling
+    stopVersionPolling();
+
     try {
         const response = await fetch(`${API_BASE}/${id}`);
 
@@ -248,6 +263,9 @@ async function loadNoteById(id) {
 
             // Show note ID in header
             showNoteId(note.id);
+
+            // Set current version and start polling for updates
+            setCurrentNoteVersion(note.modifiedAt);
         } else {
             // Note not found (404) or other error - create a new note instead
             console.warn(`Note with ID ${id} not found (${response.status}), creating new note`);
@@ -311,6 +329,9 @@ async function copyNoteLink() {
 }
 
 async function newNote() {
+    // Stop any existing version polling
+    stopVersionPolling();
+
     try {
         const response = await fetch(API_BASE, {
             method: 'POST',
@@ -342,6 +363,9 @@ async function newNote() {
 
             // Show note ID in header
             showNoteId(note.id);
+
+            // Set current version and start polling for updates
+            setCurrentNoteVersion(note.modifiedAt);
         }
     } catch (error) {
         console.error('Failed to create new note:', error);
@@ -390,6 +414,76 @@ function loadNoteFromInput() {
     if (id) {
         hideIdInput();
         window.location.href = `/${id}`;
+    }
+}
+
+// Version checking and polling
+async function checkForNoteUpdates() {
+    if (!currentNoteId || !currentNoteModifiedAt) {
+        return; // No active note to check
+    }
+
+    try {
+        const response = await fetch(`${API_BASE}/${currentNoteId}/metadata`);
+
+        if (response.ok) {
+            const metadata = await response.json();
+            const serverModifiedAt = new Date(metadata.modifiedAt).getTime();
+            const localModifiedAt = new Date(currentNoteModifiedAt).getTime();
+
+            if (serverModifiedAt > localModifiedAt) {
+                // Note has been updated elsewhere - auto-reload it
+                await autoReloadNote();
+            }
+        }
+    } catch (error) {
+        console.error('Failed to check for note updates:', error);
+    }
+}
+
+function startVersionPolling() {
+    // Clear any existing polling
+    stopVersionPolling();
+
+    if (currentNoteId) {
+        versionCheckInterval = setInterval(checkForNoteUpdates, VERSION_CHECK_INTERVAL_MS);
+    }
+}
+
+function stopVersionPolling() {
+    if (versionCheckInterval) {
+        clearInterval(versionCheckInterval);
+        versionCheckInterval = null;
+    }
+}
+
+function setCurrentNoteVersion(modifiedAt) {
+    currentNoteModifiedAt = modifiedAt;
+    startVersionPolling();
+}
+
+function showUpdateToast() {
+    const toast = document.getElementById('updateToast');
+    if (toast) {
+        toast.classList.remove('hidden');
+
+        // Hide after 2 seconds
+        setTimeout(() => {
+            toast.classList.add('hidden');
+        }, 2000);
+    }
+}
+
+async function autoReloadNote() {
+    if (currentNoteId) {
+        // Temporarily stop polling to avoid conflicts during reload
+        stopVersionPolling();
+
+        // Reload the note
+        await loadNoteById(currentNoteId);
+
+        // Show brief update message
+        showUpdateToast();
     }
 }
 
