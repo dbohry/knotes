@@ -5,14 +5,18 @@ import com.github.f4b6a3.ulid.UlidCreator;
 import com.lhamacorp.knotes.domain.Note;
 import com.lhamacorp.knotes.exception.NotFoundException;
 import com.lhamacorp.knotes.repository.NoteRepository;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.List;
 
 @Service
 public class NoteService {
 
     private final NoteRepository repository;
+
+    private static final String ONCE_PER_DAY_AT_2AM = "0 0 2 * * *";
 
     public NoteService(NoteRepository repository) {
         this.repository = repository;
@@ -24,7 +28,7 @@ public class NoteService {
 
     public Note findById(String id) {
         return repository.findById(id)
-            .orElseThrow(() -> new NotFoundException("Note with id " + id + " not found!"));
+                .orElseThrow(() -> new NotFoundException("Note with id " + id + " not found!"));
     }
 
     public Note save(String content) {
@@ -37,6 +41,24 @@ public class NoteService {
         Note note = findById(id);
         Instant now = Instant.now();
         return repository.save(new Note(id, content, note.createdAt(), now));
+    }
+
+    @Scheduled(cron = ONCE_PER_DAY_AT_2AM)
+    public void cleanup() {
+        List<Note> allNotes = repository.findAll();
+        List<String> ids = allNotes.stream()
+                .filter(this::isContentEmpty)
+                .map(Note::id)
+                .toList();
+
+        if (!ids.isEmpty()) {
+            repository.deleteAllById(ids);
+        }
+    }
+
+    private boolean isContentEmpty(Note note) {
+        String content = note.content();
+        return content == null || content.trim().isEmpty();
     }
 
 }
