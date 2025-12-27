@@ -13,10 +13,7 @@ function initializeTheme() {
     const body = document.body;
     const themeSwitch = document.getElementById('themeSwitch');
 
-    if (!themeSwitch) {
-        console.error('Theme switch element not found');
-        return;
-    }
+    if (!themeSwitch) return;
 
     // Apply the theme
     if (savedTheme === 'dark') {
@@ -26,16 +23,15 @@ function initializeTheme() {
         body.removeAttribute('data-theme');
         themeSwitch.classList.remove('dark');
     }
+
+    updateThemeColor();
 }
 
 function toggleTheme() {
     const body = document.body;
     const themeSwitch = document.getElementById('themeSwitch');
 
-    if (!themeSwitch) {
-        console.error('Theme switch element not found');
-        return;
-    }
+    if (!themeSwitch) return;
 
     // Toggle between light and dark themes
     const currentTheme = body.getAttribute('data-theme');

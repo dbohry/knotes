@@ -9,29 +9,15 @@
     <meta name="apple-mobile-web-app-title" content="kNotes">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="application-name" content="kNotes">
-    <title>kNotes</title>
+    <title>{{PAGE_TITLE}}</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="icon" type="image/x-icon" href="img/favicon.ico">
 </head>
 <body>
-<div id="headerContainer"></div>
-
-<div id="updateToast" class="update-toast hidden">
-    📄 Note was updated
-</div>
-
-<div class="content">
-    <textarea class="note-area" id="noteContent" placeholder="Start typing your note..."></textarea>
-</div>
-
-<div id="modalContainer"></div>
+{{PAGE_CONTENT}}
 
 <script src="js/components.js"></script>
 <script src="js/script.js"></script>
-<script>
-document.addEventListener('DOMContentLoaded', async () => {
-    await initPage('editor');
-});
-</script>
+{{PAGE_SCRIPT}}
 </body>
 </html>

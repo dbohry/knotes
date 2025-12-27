@@ -10,16 +10,11 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="application-name" content="kNotes">
     <title>Page Not Found - kNotes</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" type="image/x-icon" href="img/favicon.ico">
 </head>
 <body>
-<div class="header">
-    <div class="title" onclick="window.location.href='/'" style="cursor: pointer;"><img src="logo.png" alt="kNotes logo"/> kNotes</div>
-    <div class="header-right">
-        <div class="theme-switch" id="themeSwitch" onclick="toggleTheme()" title="Toggle dark/light theme"></div>
-        <button class="new-btn" onclick="window.location.href='/'">Home</button>
-    </div>
-</div>
+<div id="headerContainer"></div>
 
 <div class="content">
     <div class="error-content">
@@ -29,98 +24,25 @@
             The page you're looking for doesn't exist. It might have been moved, deleted,
             or you entered the wrong URL.
         </p>
+        <div class="error-actions">
+            <button class="dialog-btn primary" onclick="window.location.href='/'">
+                Go Home
+            </button>
+            <button class="dialog-btn secondary" onclick="showIdInput()">
+                Open Note
+            </button>
+        </div>
     </div>
 </div>
 
+<div id="modalContainer"></div>
+
+<script src="js/components.js"></script>
+<script src="js/script.js"></script>
 <script>
-    function initializeTheme() {
-        const savedTheme = localStorage.getItem('theme') || 'light';
-        const body = document.body;
-        const themeSwitch = document.getElementById('themeSwitch');
-
-        if (!themeSwitch) return;
-
-        if (savedTheme === 'dark') {
-            body.setAttribute('data-theme', 'dark');
-            themeSwitch.classList.add('dark');
-        } else {
-            body.removeAttribute('data-theme');
-            themeSwitch.classList.remove('dark');
-        }
-
-        updateThemeColor();
-    }
-
-    function toggleTheme() {
-        const body = document.body;
-        const themeSwitch = document.getElementById('themeSwitch');
-
-        if (!themeSwitch) return;
-
-        const currentTheme = body.getAttribute('data-theme');
-
-        if (currentTheme === 'dark') {
-            body.removeAttribute('data-theme');
-            themeSwitch.classList.remove('dark');
-            localStorage.setItem('theme', 'light');
-        } else {
-            body.setAttribute('data-theme', 'dark');
-            themeSwitch.classList.add('dark');
-            localStorage.setItem('theme', 'dark');
-        }
-
-        updateThemeColor();
-    }
-
-    function updateThemeColor() {
-        const themeColorMeta = document.querySelector('meta[name="theme-color"]');
-        const currentTheme = document.body.getAttribute('data-theme');
-
-        if (themeColorMeta) {
-            if (currentTheme === 'dark') {
-                themeColorMeta.setAttribute('content', '#2d2d2d');
-            } else {
-                themeColorMeta.setAttribute('content', '#007bff');
-            }
-        }
-    }
-
-    function hideIdInput() {
-        const idInputOverlay = document.getElementById('idInputOverlay');
-        const noteIdInput = document.getElementById('noteIdInput');
-
-        if (idInputOverlay) {
-            idInputOverlay.classList.add('hidden');
-        }
-
-        if (noteIdInput) {
-            noteIdInput.value = '';
-        }
-    }
-
-    function loadNoteFromInput() {
-        const noteIdInput = document.getElementById('noteIdInput');
-        if (!noteIdInput) return;
-
-        const id = noteIdInput.value.trim();
-        if (id) {
-            hideIdInput();
-            window.location.href = `/${id}`;
-        }
-    }
-
-    document.addEventListener('DOMContentLoaded', function () {
-        initializeTheme();
-
-        const noteIdInput = document.getElementById('noteIdInput');
-        if (noteIdInput) {
-            noteIdInput.addEventListener('keypress', function (e) {
-                if (e.key === 'Enter') {
-                    loadNoteFromInput();
-                }
-            });
-        }
-    });
+document.addEventListener('DOMContentLoaded', async () => {
+    await initPage('error');
+});
 </script>
 </body>
 </html>
