@@ -16,7 +16,7 @@
 <div class="header">
     <div class="title" onclick="window.location.href='/'" style="cursor: pointer;"><img src="logo.png" alt="kNotes logo"/> kNotes</div>
     <div class="header-right">
-        <span class="note-id" id="noteIdDisplay" style="display: none;"></span>
+        <span class="note-id" id="noteIdDisplay" style="display: none; cursor: pointer;" onclick="copyNoteLink()" title="Click to copy note link"></span>
         <div class="theme-switch" id="themeSwitch" onclick="toggleTheme()" title="Toggle dark/light theme"></div>
         <button class="new-btn" onclick="showIdInput()">Open</button>
         <button class="new-btn" onclick="newNote()">New</button>

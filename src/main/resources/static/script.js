@@ -279,6 +279,46 @@ function hideNoteId() {
     }
 }
 
+async function copyNoteLink() {
+    try {
+        const noteIdDisplay = document.getElementById('noteIdDisplay');
+        if (!noteIdDisplay) {
+            console.error('Element with ID "noteIdDisplay" not found');
+            return;
+        }
+
+        // Get the current URL
+        const currentUrl = window.location.href;
+
+        // Copy to clipboard
+        await navigator.clipboard.writeText(currentUrl);
+
+        // Visual feedback - temporarily show "Copied!" text
+        const originalText = noteIdDisplay.textContent;
+        noteIdDisplay.textContent = 'Copied!';
+        noteIdDisplay.style.color = 'var(--accent-primary)';
+
+        // Restore original text after 2 seconds
+        setTimeout(() => {
+            noteIdDisplay.textContent = originalText;
+            noteIdDisplay.style.color = '';
+        }, 2000);
+
+    } catch (error) {
+        console.error('Failed to copy note link:', error);
+
+        // Fallback for older browsers - try to select the URL
+        const noteIdDisplay = document.getElementById('noteIdDisplay');
+        if (noteIdDisplay) {
+            const originalText = noteIdDisplay.textContent;
+            noteIdDisplay.textContent = 'Copy failed';
+            setTimeout(() => {
+                noteIdDisplay.textContent = originalText;
+            }, 2000);
+        }
+    }
+}
+
 async function newNote() {
     try {
         const response = await fetch(API_BASE, {
