@@ -5,6 +5,8 @@ import com.github.f4b6a3.ulid.UlidCreator;
 import com.lhamacorp.knotes.domain.Note;
 import com.lhamacorp.knotes.exception.NotFoundException;
 import com.lhamacorp.knotes.repository.NoteRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +19,8 @@ public class NoteService {
     private final NoteRepository repository;
 
     private static final String ONCE_PER_DAY_AT_2AM = "0 0 2 * * *";
+
+    Logger log = LoggerFactory.getLogger(NoteService.class);
 
     public NoteService(NoteRepository repository) {
         this.repository = repository;
@@ -33,12 +37,18 @@ public class NoteService {
 
     public Note save(String content) {
         Ulid id = UlidCreator.getUlid();
+
+        log.info("Saving new note [{}]", id);
+
         Instant now = Instant.now();
         return repository.save(new Note(id.toString(), content, now, now));
     }
 
     public Note update(String id, String content) {
         Note note = findById(id);
+
+        log.info("Updating note [{}]", id);
+
         Instant now = Instant.now();
         return repository.save(new Note(id, content, note.createdAt(), now));
     }
@@ -52,6 +62,7 @@ public class NoteService {
                 .toList();
 
         if (!ids.isEmpty()) {
+            log.info("Cleaning empty notes [{}]", ids);
             repository.deleteAllById(ids);
         }
     }
