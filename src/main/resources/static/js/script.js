@@ -85,8 +85,6 @@ function init() {
     // Set up auto-save on content change
     if (noteContent) {
         noteContent.addEventListener('input', handleContentChange);
-    } else {
-        console.error('Element with ID "noteContent" not found');
     }
 
     // Handle Enter key in ID input
@@ -97,8 +95,6 @@ function init() {
                 loadNoteFromInput();
             }
         });
-    } else {
-        console.error('Element with ID "noteIdInput" not found');
     }
 }
 
