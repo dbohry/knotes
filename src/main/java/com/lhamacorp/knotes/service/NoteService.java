@@ -31,20 +31,20 @@ public class NoteService {
         return repository.existsById(id);
     }
 
-    @Cacheable(value = "contentCache", key = "#id")
+    @Cacheable(value = "content", key = "#id")
     public Note findById(String id) {
         return repository.findById(id)
-            .orElseThrow(() -> new NotFoundException("Note with id " + id + " not found!"));
+                .orElseThrow(() -> new NotFoundException("Note with id " + id + " not found!"));
     }
 
-    @Cacheable(value = "metadataCache", key = "#id")
+    @Cacheable(value = "metadata", key = "#id")
     public NoteMetadata findMetadataById(String id) {
         Note noteProjection = repository.findMetadataProjectionById(id)
-            .orElseThrow(() -> new NotFoundException("Note with id " + id + " not found!"));
+                .orElseThrow(() -> new NotFoundException("Note with id " + id + " not found!"));
         return NoteMetadata.from(noteProjection);
     }
 
-    @CacheEvict(value = {"contentCache", "metadataCache"}, key = "#result.id")
+    @CacheEvict(value = {"content", "metadata"}, key = "#result.id")
     public Note save(String content) {
         Ulid id = UlidCreator.getUlid();
 
@@ -54,10 +54,10 @@ public class NoteService {
         return repository.save(new Note(id.toString(), content, now, now));
     }
 
-    @CacheEvict(value = {"contentCache", "metadataCache"}, key = "#id")
+    @CacheEvict(value = {"content", "metadata"}, key = "#id")
     public Note update(String id, String content) {
         Note note = repository.findById(id)
-            .orElseThrow(() -> new NotFoundException("Note with id " + id + " not found!"));
+                .orElseThrow(() -> new NotFoundException("Note with id " + id + " not found!"));
 
         log.info("Updating note [{}]", id);
 

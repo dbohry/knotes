@@ -1,6 +1,5 @@
 package com.lhamacorp.knotes.config;
 
-import com.github.benmanes.caffeine.cache.Caffeine;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.caffeine.CaffeineCache;
@@ -9,7 +8,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.time.Duration;
-import java.util.Arrays;
+import java.util.List;
+
+import static com.github.benmanes.caffeine.cache.Caffeine.newBuilder;
+import static java.time.Duration.ofSeconds;
 
 @Configuration
 @EnableCaching
@@ -17,31 +19,20 @@ public class CacheConfig {
 
     @Bean
     public CacheManager cacheManager() {
-        SimpleCacheManager cacheManager = new SimpleCacheManager();
+        CaffeineCache content = build("content", ofSeconds(60), 1000);
+        CaffeineCache metadata = build("metadata", ofSeconds(10), 500);
 
-        cacheManager.setCaches(Arrays.asList(
-            new CaffeineCache("contentCache", contentCacheCaffeine().build()),
-            new CaffeineCache("metadataCache", metadataCacheCaffeine().build())
-        ));
 
-        return cacheManager;
+        SimpleCacheManager manager = new SimpleCacheManager();
+        manager.setCaches(List.of(content, metadata));
+        return manager;
     }
 
-    @Bean
-    public Caffeine<Object, Object> contentCacheCaffeine() {
-        return Caffeine.newBuilder()
-                .initialCapacity(20)
-                .maximumSize(100)
-                .expireAfterWrite(Duration.ofSeconds(30))
-                .recordStats();
+    private CaffeineCache build(String name, Duration duration, long size) {
+        return new CaffeineCache(name, newBuilder()
+                .expireAfterWrite(duration)
+                .maximumSize(size)
+                .build());
     }
 
-    @Bean
-    public Caffeine<Object, Object> metadataCacheCaffeine() {
-        return Caffeine.newBuilder()
-                .initialCapacity(50)
-                .maximumSize(500)
-                .expireAfterWrite(Duration.ofSeconds(10))
-                .recordStats();
-    }
 }
