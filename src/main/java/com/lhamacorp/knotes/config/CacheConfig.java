@@ -22,7 +22,6 @@ public class CacheConfig {
         CaffeineCache content = build("content", ofSeconds(60), 1000);
         CaffeineCache metadata = build("metadata", ofSeconds(10), 500);
 
-
         SimpleCacheManager manager = new SimpleCacheManager();
         manager.setCaches(List.of(content, metadata));
         return manager;
@@ -32,6 +31,7 @@ public class CacheConfig {
         return new CaffeineCache(name, newBuilder()
                 .expireAfterWrite(duration)
                 .maximumSize(size)
+                .recordStats()
                 .build());
     }
 
