@@ -18,7 +18,7 @@ class NoteTest {
 
         // Then
         assertEquals(id, note.id());
-        assertEquals(content, note.content()); // Should decompress correctly
+        assertEquals(content, note.content());
         assertEquals(now, note.createdAt());
         assertEquals(now, note.modifiedAt());
 

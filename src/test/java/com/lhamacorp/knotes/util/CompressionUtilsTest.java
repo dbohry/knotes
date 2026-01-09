@@ -86,12 +86,8 @@ class CompressionUtilsTest {
     @Test
     void compress_largeRepeatingText_shouldAchieveHighCompressionRatio() {
         // Given - Large text with lots of repetition (typical of notes with repeated patterns)
-        StringBuilder sb = new StringBuilder();
         String pattern = "This is a repeated pattern in a note that demonstrates compression. ";
-        for (int i = 0; i < 50; i++) {
-            sb.append(pattern);
-        }
-        String largeText = sb.toString();
+        String largeText = pattern.repeat(50);
 
         // When
         byte[] compressed = CompressionUtils.compress(largeText);
@@ -111,7 +107,7 @@ class CompressionUtilsTest {
 
     @Test
     void compress_jsonLikeContent_shouldCompressWell() {
-        // Given - JSON-like content (common in technical notes)
+        // Given
         String jsonContent = """
             {
               "project": "kNotes",
@@ -128,7 +124,7 @@ class CompressionUtilsTest {
                 "version": "1.0"
               }
             }
-            """.repeat(10); // Repeat to make it larger
+            """.repeat(10);
 
         // When
         byte[] compressed = CompressionUtils.compress(jsonContent);
@@ -147,7 +143,7 @@ class CompressionUtilsTest {
 
     @Test
     void compress_codeSnippet_shouldPreserveFormatting() {
-        // Given - Code snippet (common content in developer notes)
+        // Given
         String codeSnippet = """
             public class Example {
                 private String value;
@@ -188,7 +184,7 @@ class CompressionUtilsTest {
 
     @Test
     void compress_mixedContent_shouldHandleVariousCharacters() {
-        // Given - Mixed content with various characters (emoji, unicode, special chars)
+        // Given
         String mixedContent = """
             📝 Note Title: Project Planning
 
