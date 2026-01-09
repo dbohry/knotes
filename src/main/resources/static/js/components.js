@@ -1,4 +1,3 @@
-// Enhanced component loader
 async function loadComponent(componentPath, targetId, customizations = {}) {
     try {
         const response = await fetch(componentPath);

@@ -265,34 +265,31 @@ body {
     background: var(--bg-tertiary);
     border: 1px solid var(--border-primary);
     border-radius: 20px;
-    padding: 4px;
+    padding: 6px;
     cursor: pointer;
-    width: 44px;
-    height: 24px;
+    width: 36px;
+    height: 36px;
     position: relative;
     transition: all 0.3s ease;
     display: flex;
     align-items: center;
+    justify-content: center;
+    font-size: 16px;
 }
 
 .theme-switch:hover {
     background: var(--border-primary);
+    transform: scale(1.05);
 }
 
 .theme-switch::before {
-    content: '';
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background: var(--accent-primary);
-    position: absolute;
-    left: 4px;
+    content: '☀️';
     transition: all 0.3s ease;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.2));
 }
 
 .theme-switch.dark::before {
-    transform: translateX(20px);
+    content: '🌙';
 }
 
 .hidden {
@@ -339,24 +336,15 @@ body {
 
     /* Make theme switch more touch-friendly */
     .theme-switch {
-        width: 48px;
-        height: 28px;
-        padding: 6px;
-        min-width: 48px;
-        min-height: 48px;
+        width: 44px;
+        height: 44px;
+        padding: 8px;
+        min-width: 44px;
+        min-height: 44px;
         display: flex;
         align-items: center;
         justify-content: center;
-    }
-
-    .theme-switch::before {
-        width: 18px;
-        height: 18px;
-        left: 6px;
-    }
-
-    .theme-switch.dark::before {
-        transform: translateX(18px);
+        font-size: 18px;
     }
 
     /* Touch-friendly buttons */
@@ -450,18 +438,9 @@ body {
     }
 
     .theme-switch {
-        width: 46px;
-        height: 26px;
-    }
-
-    .theme-switch::before {
-        width: 17px;
-        height: 17px;
-        left: 5px;
-    }
-
-    .theme-switch.dark::before {
-        transform: translateX(19px);
+        width: 38px;
+        height: 38px;
+        font-size: 17px;
     }
 }
 
@@ -604,19 +583,10 @@ body {
     }
 
     .theme-switch {
-        width: 40px;
-        height: 22px;
+        width: 36px;
+        height: 36px;
         min-height: 36px;
-    }
-
-    .theme-switch::before {
-        width: 14px;
-        height: 14px;
-        left: 4px;
-    }
-
-    .theme-switch.dark::before {
-        transform: translateX(16px);
+        font-size: 14px;
     }
 
     .note-area {
