@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#007bff">
+    <meta name="theme-color" content="#2d2d2d">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="kNotes">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="application-name" content="kNotes">
-    <title>kNotes - Simple Note Taking</title>
+    <title>Page Not Found - kNotes</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="icon" type="image/x-icon" href="img/favicon.ico">
 </head>
@@ -18,14 +18,18 @@
 
 <div class="content">
     <div class="error-content">
-        <div class="error-icon"><img src="img/logo.png"  alt="Lhamacorp"/></div>
-        <h1 class="error-title">Welcome to kNotes</h1>
+        <div class="error-icon">📄</div>
+        <h1 class="error-title">Page Not Found</h1>
+        <p class="error-message">
+            The page you're looking for doesn't exist. It might have been moved, deleted,
+            or you entered the wrong URL.
+        </p>
         <div class="error-actions">
-            <button class="dialog-btn primary" onclick="window.location.href='/index.html'">
-                Create New Note
+            <button class="dialog-btn primary" onclick="navigateToPage('home.html')">
+                Go Home
             </button>
             <button class="dialog-btn secondary" onclick="showIdInput()">
-                Open Existing Note
+                Open Note
             </button>
         </div>
     </div>
@@ -37,7 +41,7 @@
 <script src="js/script.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', async () => {
-    await initPage('home');
+    await initPage('error');
 });
 </script>
 </body>
