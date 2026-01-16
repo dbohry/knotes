@@ -4,6 +4,11 @@ on:
   push:
     branches: [ main ]
 
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -51,9 +56,8 @@ jobs:
     needs: dockerize
     runs-on: ubuntu-latest
     outputs:
-      release-id: ${{ steps.create-release.outputs.id }}
-      release-tag: ${{ steps.create-release.outputs.tag_name }}
-      release-upload-url: ${{ steps.create-release.outputs.upload_url }}
+      release-tag: ${{ steps.get-version.outputs.tag }}
+      release-version: ${{ steps.get-version.outputs.version }}
     steps:
       - uses: actions/checkout@v4
 
@@ -68,42 +72,54 @@ jobs:
 
       - name: Create Desktop App Release
         id: create-release
-        uses: actions/create-release@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ steps.get-version.outputs.tag }}
-          release_name: kNotes Desktop v${{ steps.get-version.outputs.version }}
-          body: |
-            ## 🚀 kNotes Release - Docker + Desktop Apps
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${{ steps.get-version.outputs.tag }}"
+          VERSION="${{ steps.get-version.outputs.version }}"
 
-            This release includes both the deployed web application and desktop apps for all platforms.
+          # Create release notes
+          cat > release-notes.md << 'EOF'
+          ## 🚀 kNotes Release - Docker + Desktop Apps
 
-            ### 🐳 Docker Deployment:
-            - **Image**: `lhamacorp/knotes:latest`
-            - **Platforms**: linux/amd64, linux/arm64
-            - **Deployed to**: https://notes.lhamacorp.com
+          This release includes both the deployed web application and desktop apps for all platforms.
 
-            ### 📱 Desktop Apps:
-            - **Windows**: Download the `.exe` installer
-            - **macOS**: Download the `.dmg` installer
-            - **Linux**: Download the `.AppImage` file
+          ### 🐳 Docker Deployment:
+          - **Image**: `lhamacorp/knotes:latest`
+          - **Platforms**: linux/amd64, linux/arm64
+          - **Deployed to**: https://notes.lhamacorp.com
 
-            ### ✨ What's New:
-            - Latest frontend updates from the web application
-            - Automatic synchronization with deployed API
-            - Bug fixes and improvements
-            - Auto-update functionality for desktop apps
+          ### 📱 Desktop Apps:
+          - **Windows**: Download the `.exe` installer
+          - **macOS**: Download the `.dmg` installer
+          - **Linux**: Download the `.AppImage` file
 
-            ### 📦 Installation:
-            1. Download the appropriate desktop app for your operating system
-            2. Install/run the application
-            3. The app connects to the deployed API and will check for future updates automatically
+          ### ✨ What's New:
+          - Latest frontend updates from the web application
+          - Automatic synchronization with deployed API
+          - Bug fixes and improvements
+          - Auto-update functionality for desktop apps
 
-            **Built from commit**: ${{ github.sha }}
-            **Docker image**: `docker pull lhamacorp/knotes:latest`
-          draft: false
-          prerelease: false
+          ### 📦 Installation:
+          1. Download the appropriate desktop app for your operating system
+          2. Install/run the application
+          3. The app connects to the deployed API and will check for future updates automatically
+
+          **Built from commit**: ${{ github.sha }}
+          **Docker image**: `docker pull lhamacorp/knotes:latest`
+          EOF
+
+          # Create release using GitHub CLI
+          gh release create "$TAG" \
+            --title "kNotes Desktop v${VERSION}" \
+            --notes-file release-notes.md \
+            --latest || {
+            echo "Release already exists, updating it..."
+            gh release edit "$TAG" \
+              --title "kNotes Desktop v${VERSION}" \
+              --notes-file release-notes.md \
+              --latest
+          }
 
   build-linux-desktop:
     name: Build Linux Desktop
@@ -131,6 +147,7 @@ jobs:
       - name: Build and publish Linux
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cd desktop-app
           npm run publish-linux
@@ -161,6 +178,7 @@ jobs:
       - name: Build and publish Windows
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cd desktop-app
           npm run publish-win
@@ -191,6 +209,7 @@ jobs:
       - name: Build and publish macOS
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cd desktop-app
           npm run publish-mac
