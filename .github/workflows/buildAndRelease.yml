@@ -144,13 +144,39 @@ jobs:
           cd desktop-app
           npm ci
 
-      - name: Build and publish Linux
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build Linux Desktop App
         run: |
           cd desktop-app
-          npm run publish-linux
+          npm run build-linux
+
+      - name: Debug Build Output
+        run: |
+          cd desktop-app
+          echo "=== Build Output ==="
+          ls -la dist/ || echo "No dist directory"
+          echo "=== End Build Output ==="
+
+      - name: Upload Linux Build to Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd desktop-app
+          TAG="${{ needs.create-desktop-release.outputs.release-tag }}"
+          echo "Uploading to release: $TAG"
+
+          # Check if AppImage exists
+          if ls dist/kNotes-*.AppImage 1> /dev/null 2>&1; then
+            echo "Found AppImage files:"
+            ls -la dist/kNotes-*.AppImage
+            gh release upload "$TAG" dist/kNotes-*.AppImage --clobber
+          else
+            echo "No AppImage files found"
+          fi
+
+          # Upload additional files if they exist
+          if [ -f "dist/latest-linux.yml" ]; then
+            gh release upload "$TAG" dist/latest-linux.yml --clobber
+          fi
 
   build-windows-desktop:
     name: Build Windows Desktop
@@ -175,13 +201,39 @@ jobs:
           cd desktop-app
           npm ci
 
-      - name: Build and publish Windows
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build Windows Desktop App
         run: |
           cd desktop-app
-          npm run publish-win
+          npm run build-win
+
+      - name: Debug Windows Build Output
+        run: |
+          cd desktop-app
+          echo "=== Windows Build Output ==="
+          ls -la dist/ || echo "No dist directory"
+          echo "=== End Windows Build Output ==="
+
+      - name: Upload Windows Build to Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd desktop-app
+          TAG="${{ needs.create-desktop-release.outputs.release-tag }}"
+          echo "Uploading to release: $TAG"
+
+          # Check if EXE exists
+          if ls dist/*.exe 1> /dev/null 2>&1; then
+            echo "Found Windows installer files:"
+            ls -la dist/*.exe
+            gh release upload "$TAG" dist/*.exe --clobber
+          else
+            echo "No Windows installer files found"
+          fi
+
+          # Upload additional files if they exist
+          if [ -f "dist/latest.yml" ]; then
+            gh release upload "$TAG" dist/latest.yml --clobber
+          fi
 
   build-macos-desktop:
     name: Build macOS Desktop
@@ -206,10 +258,36 @@ jobs:
           cd desktop-app
           npm ci
 
-      - name: Build and publish macOS
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build macOS Desktop App
         run: |
           cd desktop-app
-          npm run publish-mac
+          npm run build-mac
+
+      - name: Debug macOS Build Output
+        run: |
+          cd desktop-app
+          echo "=== macOS Build Output ==="
+          ls -la dist/ || echo "No dist directory"
+          echo "=== End macOS Build Output ==="
+
+      - name: Upload macOS Build to Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd desktop-app
+          TAG="${{ needs.create-desktop-release.outputs.release-tag }}"
+          echo "Uploading to release: $TAG"
+
+          # Check if DMG exists
+          if ls dist/*.dmg 1> /dev/null 2>&1; then
+            echo "Found macOS installer files:"
+            ls -la dist/*.dmg
+            gh release upload "$TAG" dist/*.dmg --clobber
+          else
+            echo "No macOS installer files found"
+          fi
+
+          # Upload additional files if they exist
+          if [ -f "dist/latest-mac.yml" ]; then
+            gh release upload "$TAG" dist/latest-mac.yml --clobber
+          fi

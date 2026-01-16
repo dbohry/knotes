@@ -111,10 +111,10 @@ jobs:
         if: ${{ github.event.inputs.test_level == 'full' }}
         run: |
           cd desktop-app
-          echo "✅ Would run: npm run publish-linux"
+          echo "✅ Would run: npm run build-linux"
           echo "✅ Would create: kNotes-X.X.X.AppImage"
-          echo "✅ Would upload to GitHub release"
-          echo "🐧 Linux build test passed"
+          echo "✅ Would run: gh release upload TAG dist/kNotes-*.AppImage"
+          echo "🐧 Linux build test passed (separate build + upload)"
 
   test-desktop-windows:
     name: Test Windows Desktop Build
@@ -134,9 +134,10 @@ jobs:
         run: |
           echo "✅ Would copy: src\main\resources\static\* to desktop-app\"
           echo "✅ Would run: npm ci"
-          echo "✅ Would run: npm run publish-win"
+          echo "✅ Would run: npm run build-win"
           echo "✅ Would create: kNotes Setup X.X.X.exe"
-          echo "🪟 Windows build test passed"
+          echo "✅ Would run: gh release upload TAG dist/*.exe"
+          echo "🪟 Windows build test passed (separate build + upload)"
 
   test-desktop-macos:
     name: Test macOS Desktop Build
@@ -156,9 +157,10 @@ jobs:
         run: |
           echo "✅ Would copy: src/main/resources/static/* to desktop-app/"
           echo "✅ Would run: npm ci"
-          echo "✅ Would run: npm run publish-mac"
+          echo "✅ Would run: npm run build-mac"
           echo "✅ Would create: kNotes-X.X.X.dmg"
-          echo "🍎 macOS build test passed"
+          echo "✅ Would run: gh release upload TAG dist/*.dmg"
+          echo "🍎 macOS build test passed (separate build + upload)"
 
   test-summary:
     name: Test Summary

@@ -1,15 +1,15 @@
 {
   "name": "knotes-desktop",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "kNotes Desktop App - A simple notes application",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
     "build": "electron-builder",
     "build-all": "electron-builder -mwl",
-    "build-win": "electron-builder --win",
-    "build-mac": "electron-builder --mac",
-    "build-linux": "electron-builder --linux",
+    "build-win": "electron-builder --win --publish=never",
+    "build-mac": "electron-builder --mac --publish=never",
+    "build-linux": "electron-builder --linux --publish=never",
     "dist": "electron-builder --publish=never",
     "publish": "electron-builder --publish=always",
     "publish-linux": "electron-builder --linux --publish=always",
@@ -37,11 +37,6 @@
       "node_modules/electron-updater/**/*",
       "!dist"
     ],
-    "publish": {
-      "provider": "github",
-      "owner": "lhamacorp",
-      "repo": "knotes"
-    },
     "mac": {
       "category": "public.app-category.productivity",
       "icon": "img/logo.png"
