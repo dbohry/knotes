@@ -4,6 +4,14 @@ on:
   push:
     branches: [ main ]
 
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 jobs:
   build-and-test:
     name: Build and Test
@@ -42,3 +50,244 @@ jobs:
         run: |
           docker buildx create --use
           docker buildx build --platform linux/amd64,linux/arm64 -t lhamacorp/knotes:latest --push .
+
+  create-desktop-release:
+    name: Create Desktop Release
+    needs: dockerize
+    runs-on: ubuntu-latest
+    outputs:
+      release-tag: ${{ steps.get-version.outputs.tag }}
+      release-version: ${{ steps.get-version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get version from package.json
+        id: get-version
+        run: |
+          VERSION=$(node -p "require('./desktop-app/package.json').version")
+          TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+          TAG="v${VERSION}-${TIMESTAMP}"
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "tag=${TAG}" >> $GITHUB_OUTPUT
+
+      - name: Create Desktop App Release
+        id: create-release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${{ steps.get-version.outputs.tag }}"
+          VERSION="${{ steps.get-version.outputs.version }}"
+
+          # Create release notes
+          cat > release-notes.md << 'EOF'
+          ## 🚀 kNotes Release - Docker + Desktop Apps
+
+          This release includes both the deployed web application and desktop apps for all platforms.
+
+          ### 🐳 Docker Deployment:
+          - **Image**: `lhamacorp/knotes:latest`
+          - **Platforms**: linux/amd64, linux/arm64
+          - **Deployed to**: https://notes.lhamacorp.com
+
+          ### 📱 Desktop Apps:
+          - **Windows**: Download the `.exe` installer
+          - **macOS**: Download the `.dmg` installer
+          - **Linux**: Download the `.AppImage` file
+
+          ### ✨ What's New:
+          - Latest frontend updates from the web application
+          - Automatic synchronization with deployed API
+          - Bug fixes and improvements
+          - Auto-update functionality for desktop apps
+
+          ### 📦 Installation:
+          1. Download the appropriate desktop app for your operating system
+          2. Install/run the application
+          3. The app connects to the deployed API and will check for future updates automatically
+
+          **Built from commit**: ${{ github.sha }}
+          **Docker image**: `docker pull lhamacorp/knotes:latest`
+          EOF
+
+          # Create release using GitHub CLI
+          gh release create "$TAG" \
+            --title "kNotes Desktop v${VERSION}" \
+            --notes-file release-notes.md \
+            --latest || {
+            echo "Release already exists, updating it..."
+            gh release edit "$TAG" \
+              --title "kNotes Desktop v${VERSION}" \
+              --notes-file release-notes.md \
+              --latest
+          }
+
+  build-linux-desktop:
+    name: Build Linux Desktop
+    needs: create-desktop-release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: desktop-app/package-lock.json
+
+      - name: Copy frontend files
+        run: |
+          cp -r src/main/resources/static/* desktop-app/
+
+      - name: Install dependencies
+        run: |
+          cd desktop-app
+          npm ci
+
+      - name: Build Linux Desktop App
+        run: |
+          cd desktop-app
+          npm run build-linux
+
+      - name: Debug Build Output
+        run: |
+          cd desktop-app
+          echo "=== Build Output ==="
+          ls -la dist/ || echo "No dist directory"
+          echo "=== End Build Output ==="
+
+      - name: Upload Linux Build to Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd desktop-app
+          TAG="${{ needs.create-desktop-release.outputs.release-tag }}"
+          echo "Uploading to release: $TAG"
+
+          # Check if AppImage exists
+          if ls dist/kNotes-*.AppImage 1> /dev/null 2>&1; then
+            echo "Found AppImage files:"
+            ls -la dist/kNotes-*.AppImage
+            gh release upload "$TAG" dist/kNotes-*.AppImage --clobber
+          else
+            echo "No AppImage files found"
+          fi
+
+          # Upload additional files if they exist
+          if [ -f "dist/latest-linux.yml" ]; then
+            gh release upload "$TAG" dist/latest-linux.yml --clobber
+          fi
+
+  build-windows-desktop:
+    name: Build Windows Desktop
+    needs: create-desktop-release
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: desktop-app/package-lock.json
+
+      - name: Copy frontend files
+        run: |
+          xcopy "src\main\resources\static\*" "desktop-app\" /E /I /Y
+
+      - name: Install dependencies
+        run: |
+          cd desktop-app
+          npm ci
+
+      - name: Build Windows Desktop App
+        run: |
+          cd desktop-app
+          npm run build-win
+
+      - name: Debug Windows Build Output
+        run: |
+          cd desktop-app
+          echo "=== Windows Build Output ==="
+          ls -la dist/ || echo "No dist directory"
+          echo "=== End Windows Build Output ==="
+
+      - name: Upload Windows Build to Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd desktop-app
+          TAG="${{ needs.create-desktop-release.outputs.release-tag }}"
+          echo "Uploading to release: $TAG"
+
+          # Check if EXE exists
+          if ls dist/*.exe 1> /dev/null 2>&1; then
+            echo "Found Windows installer files:"
+            ls -la dist/*.exe
+            gh release upload "$TAG" dist/*.exe --clobber
+          else
+            echo "No Windows installer files found"
+          fi
+
+          # Upload additional files if they exist
+          if [ -f "dist/latest.yml" ]; then
+            gh release upload "$TAG" dist/latest.yml --clobber
+          fi
+
+  build-macos-desktop:
+    name: Build macOS Desktop
+    needs: create-desktop-release
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: desktop-app/package-lock.json
+
+      - name: Copy frontend files
+        run: |
+          cp -r src/main/resources/static/* desktop-app/
+
+      - name: Install dependencies
+        run: |
+          cd desktop-app
+          npm ci
+
+      - name: Build macOS Desktop App
+        run: |
+          cd desktop-app
+          npm run build-mac
+
+      - name: Debug macOS Build Output
+        run: |
+          cd desktop-app
+          echo "=== macOS Build Output ==="
+          ls -la dist/ || echo "No dist directory"
+          echo "=== End macOS Build Output ==="
+
+      - name: Upload macOS Build to Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd desktop-app
+          TAG="${{ needs.create-desktop-release.outputs.release-tag }}"
+          echo "Uploading to release: $TAG"
+
+          # Check if DMG exists
+          if ls dist/*.dmg 1> /dev/null 2>&1; then
+            echo "Found macOS installer files:"
+            ls -la dist/*.dmg
+            gh release upload "$TAG" dist/*.dmg --clobber
+          else
+            echo "No macOS installer files found"
+          fi
+
+          # Upload additional files if they exist
+          if [ -f "dist/latest-mac.yml" ]; then
+            gh release upload "$TAG" dist/latest-mac.yml --clobber
+          fi

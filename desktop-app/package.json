@@ -1,0 +1,64 @@
+{
+  "name": "knotes-desktop",
+  "version": "1.2.1",
+  "description": "kNotes Desktop App - A simple notes application",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder",
+    "build-all": "electron-builder -mwl",
+    "build-win": "electron-builder --win --publish=never",
+    "build-mac": "electron-builder --mac --publish=never",
+    "build-linux": "electron-builder --linux --publish=never",
+    "dist": "electron-builder --publish=never",
+    "publish": "electron-builder --publish=always",
+    "publish-linux": "electron-builder --linux --publish=always",
+    "publish-win": "electron-builder --win --publish=always",
+    "publish-mac": "electron-builder --mac --publish=always"
+  },
+  "author": "lhamacorp",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lhamacorp/knotes.git"
+  },
+  "dependencies": {
+    "electron-updater": "^6.1.7"
+  },
+  "devDependencies": {
+    "electron": "^28.2.0",
+    "electron-builder": "^24.9.1"
+  },
+  "build": {
+    "appId": "com.lhamacorp.knotes",
+    "productName": "kNotes",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "**/*",
+      "!node_modules/**/*",
+      "node_modules/electron-updater/**/*",
+      "!dist"
+    ],
+    "generateUpdatesFilesForAllChannels": false,
+    "publish": null,
+    "mac": {
+      "category": "public.app-category.productivity",
+      "icon": "img/logo.png"
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "img/logo.png"
+    },
+    "linux": {
+      "target": "AppImage",
+      "icon": "img/logo.png",
+      "category": "Office"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  }
+}
