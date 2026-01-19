@@ -16,6 +16,22 @@ jobs:
   build-and-test:
     name: Build and Test
     runs-on: ubuntu-latest
+
+    services:
+      mongodb:
+        image: mongo:7.0
+        options: >-
+          --health-cmd "mongosh --quiet --eval 'db.runCommand({ping: 1})'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 27017:27017
+
+    env:
+      mongo: mongodb://localhost:27017
+      database: knotes-test
+
     steps:
       - uses: actions/checkout@v3
       - name: Set up JDK
