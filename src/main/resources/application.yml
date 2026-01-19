@@ -5,3 +5,6 @@ spring:
   mongodb:
     database: ${database:knotes}
     uri: ${mongo:mongodb://localhost:27017}
+
+auth:
+  api: ${auth_api:}

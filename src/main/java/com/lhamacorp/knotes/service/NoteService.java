@@ -3,6 +3,8 @@ package com.lhamacorp.knotes.service;
 import com.github.f4b6a3.ulid.Ulid;
 import com.github.f4b6a3.ulid.UlidCreator;
 import com.lhamacorp.knotes.api.dto.NoteMetadata;
+import com.lhamacorp.knotes.context.UserContext;
+import com.lhamacorp.knotes.context.UserContextHolder;
 import com.lhamacorp.knotes.domain.Note;
 import com.lhamacorp.knotes.exception.NotFoundException;
 import com.lhamacorp.knotes.repository.NoteRepository;
@@ -12,8 +14,11 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.Collections;
+import java.util.List;
 
 import static java.time.Instant.now;
+import static java.util.Collections.emptyList;
 import static org.slf4j.LoggerFactory.getLogger;
 
 @Service
@@ -30,6 +35,16 @@ public class NoteService {
 
     public boolean exists(String id) {
         return repository.existsById(id);
+    }
+
+    public List<String> findAll() {
+        UserContext user = UserContextHolder.get();
+
+        //id 1 is anon and this should only return a list for authenticated users
+        return "1".equals(user.id())
+                ? emptyList()
+                : repository.findAllByCreatedBy(user.id()).stream().map(Note::id).toList();
+
     }
 
     @Cacheable(value = "content", key = "#id")
@@ -50,7 +65,7 @@ public class NoteService {
         log.debug("Saving note [{}]", id);
 
         Instant now = now();
-        return repository.save(new Note(id.toString(), content, now, now));
+        return repository.save(new Note(id.toString(), content, UserContextHolder.get().id(), now, now));
     }
 
     @CacheEvict(value = {"content", "metadata"}, key = "#id")
@@ -59,7 +74,7 @@ public class NoteService {
 
         log.debug("Updating note [{}]", id);
 
-        return repository.save(new Note(id, content, note.createdAt(), now()));
+        return repository.save(new Note(id, content, note.createdBy(), note.createdAt(), now()));
     }
 
 }

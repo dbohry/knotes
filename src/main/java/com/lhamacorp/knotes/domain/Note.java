@@ -10,14 +10,15 @@ import java.time.Instant;
 
 @Document("notes")
 public record Note(
-    @Id String id,
-    @Field("content") Binary compressedData,
-    Instant createdAt,
-    Instant modifiedAt
+        @Id String id,
+        @Field("content") Binary compressedData,
+        String createdBy,
+        Instant createdAt,
+        Instant modifiedAt
 ) {
 
-    public Note(String id, String content, Instant createdAt, Instant modifiedAt) {
-        this(id, content != null ? new Binary(CompressionUtils.compress(content)) : null, createdAt, modifiedAt);
+    public Note(String id, String content, String createdBy, Instant createdAt, Instant modifiedAt) {
+        this(id, content != null ? new Binary(CompressionUtils.compress(content)) : null, createdBy, createdAt, modifiedAt);
     }
 
     public String content() {

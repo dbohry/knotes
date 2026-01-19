@@ -16,4 +16,7 @@ public interface NoteRepository extends MongoRepository<Note, String> {
 
     @Query(value = "{ 'content': BinData(0, '') }", fields = "{ '_id': 1, 'createdAt': 1 }")
     List<Note> findEmptyNotes();
+
+    List<Note> findAllByCreatedBy(String createdBy);
+
 }

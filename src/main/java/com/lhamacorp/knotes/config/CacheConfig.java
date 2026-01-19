@@ -21,9 +21,10 @@ public class CacheConfig {
     public CacheManager cacheManager() {
         CaffeineCache content = build("content", ofSeconds(60), 1000);
         CaffeineCache metadata = build("metadata", ofSeconds(10), 500);
+        CaffeineCache current = build("current", ofSeconds(60), 1000);
 
         SimpleCacheManager manager = new SimpleCacheManager();
-        manager.setCaches(List.of(content, metadata));
+        manager.setCaches(List.of(content, metadata, current));
         return manager;
     }
 

@@ -9,6 +9,8 @@ import com.lhamacorp.knotes.service.NoteService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("api/notes")
 @CrossOrigin(origins = "*")
@@ -18,6 +20,11 @@ public class NoteController {
 
     public NoteController(NoteService service) {
         this.service = service;
+    }
+
+    @GetMapping
+    public ResponseEntity<List<String>> findByUserId() {
+        return ResponseEntity.ok(service.findAll());
     }
 
     @GetMapping("{id}")
