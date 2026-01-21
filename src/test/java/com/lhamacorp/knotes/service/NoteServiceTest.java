@@ -1,9 +1,12 @@
 package com.lhamacorp.knotes.service;
 
 import com.lhamacorp.knotes.api.dto.NoteMetadata;
+import com.lhamacorp.knotes.context.UserContext;
+import com.lhamacorp.knotes.context.UserContextHolder;
 import com.lhamacorp.knotes.domain.Note;
 import com.lhamacorp.knotes.exception.NotFoundException;
 import com.lhamacorp.knotes.repository.NoteRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,8 +16,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 
+import static java.time.Instant.now;
+import static java.util.Collections.emptyList;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -34,14 +40,27 @@ class NoteServiceTest {
     private String testContent;
     private Instant testCreatedAt;
     private Instant testModifiedAt;
+    private UserContext testUserContext;
+    private String testUserId;
 
     @BeforeEach
     void setUp() {
         testId = "01ABCDEF1234567890ABCDEF12";
+        testUserId = "user123";
         testContent = "This is a test note content";
         testCreatedAt = Instant.parse("2024-01-01T10:00:00Z");
         testModifiedAt = Instant.parse("2024-01-01T11:00:00Z");
-        testNote = new Note(testId, testContent, testCreatedAt, testModifiedAt);
+        testNote = new Note(testId, testContent, testUserId, testCreatedAt, testModifiedAt);
+
+        // Set up UserContext for all tests
+        testUserContext = new UserContext(testUserId, "testuser", List.of("USER"));
+        UserContextHolder.set(testUserContext);
+    }
+
+    @AfterEach
+    void tearDown() {
+        // Clean up UserContextHolder to avoid test pollution
+        UserContextHolder.clear();
     }
 
     @Test
@@ -135,7 +154,7 @@ class NoteServiceTest {
         String content = "New note content";
         ArgumentCaptor<Note> noteCaptor = ArgumentCaptor.forClass(Note.class);
 
-        Note savedNote = new Note("generated-ulid", content, Instant.now(), Instant.now());
+        Note savedNote = new Note("generated-ulid", content, testUserId, now(), now());
         when(repository.save(any(Note.class))).thenReturn(savedNote);
 
         // When
@@ -148,6 +167,7 @@ class NoteServiceTest {
         Note capturedNote = noteCaptor.getValue();
         assertNotNull(capturedNote.id());
         assertEquals(content, capturedNote.content());
+        assertEquals(testUserId, capturedNote.createdBy());
         assertNotNull(capturedNote.createdAt());
         assertNotNull(capturedNote.modifiedAt());
         assertEquals(capturedNote.createdAt(), capturedNote.modifiedAt());
@@ -158,7 +178,7 @@ class NoteServiceTest {
         // Given
         ArgumentCaptor<Note> noteCaptor = ArgumentCaptor.forClass(Note.class);
 
-        Note savedNote = new Note("generated-ulid", (String) null, Instant.now(), Instant.now());
+        Note savedNote = new Note("generated-ulid", (String) null, testUserId, now(), now());
         when(repository.save(any(Note.class))).thenReturn(savedNote);
 
         // When
@@ -170,6 +190,7 @@ class NoteServiceTest {
 
         Note capturedNote = noteCaptor.getValue();
         assertNull(capturedNote.content());
+        assertEquals(testUserId, capturedNote.createdBy());
     }
 
     @Test
@@ -178,7 +199,7 @@ class NoteServiceTest {
         String emptyContent = "";
         ArgumentCaptor<Note> noteCaptor = ArgumentCaptor.forClass(Note.class);
 
-        Note savedNote = new Note("generated-ulid", emptyContent, Instant.now(), Instant.now());
+        Note savedNote = new Note("generated-ulid", emptyContent, testUserId, now(), now());
         when(repository.save(any(Note.class))).thenReturn(savedNote);
 
         // When
@@ -190,6 +211,7 @@ class NoteServiceTest {
 
         Note capturedNote = noteCaptor.getValue();
         assertEquals(emptyContent, capturedNote.content());
+        assertEquals(testUserId, capturedNote.createdBy());
     }
 
     @Test
@@ -199,7 +221,7 @@ class NoteServiceTest {
         when(repository.findById(testId)).thenReturn(Optional.of(testNote));
 
         ArgumentCaptor<Note> noteCaptor = ArgumentCaptor.forClass(Note.class);
-        Note updatedNote = new Note(testId, updatedContent, testCreatedAt, Instant.now());
+        Note updatedNote = new Note(testId, updatedContent, testUserId, testCreatedAt, now());
         when(repository.save(any(Note.class))).thenReturn(updatedNote);
 
         // When
@@ -238,7 +260,7 @@ class NoteServiceTest {
         when(repository.findById(testId)).thenReturn(Optional.of(testNote));
 
         ArgumentCaptor<Note> noteCaptor = ArgumentCaptor.forClass(Note.class);
-        Note updatedNote = new Note(testId, (String) null, testCreatedAt, Instant.now());
+        Note updatedNote = new Note(testId, (String) null, testUserId, testCreatedAt, now());
         when(repository.save(any(Note.class))).thenReturn(updatedNote);
 
         // When
@@ -250,5 +272,49 @@ class NoteServiceTest {
 
         Note capturedNote = noteCaptor.getValue();
         assertNull(capturedNote.content());
+    }
+
+    @Test
+    void findAll_withAuthenticatedUser_shouldReturnNoteIds() {
+        // Given
+        List<Note> notes = List.of(
+            new Note("note1", "content1", testUserId, testCreatedAt, testModifiedAt),
+            new Note("note2", "content2", testUserId, testCreatedAt, testModifiedAt)
+        );
+        when(repository.findAllByCreatedBy(testUserId)).thenReturn(notes);
+
+        // When
+        List<String> result = noteService.findAll();
+
+        // Then
+        assertEquals(List.of("note1", "note2"), result);
+        verify(repository).findAllByCreatedBy(testUserId);
+    }
+
+    @Test
+    void findAll_withAnonymousUser_shouldReturnEmptyList() {
+        // Given
+        UserContext anonymousUser = new UserContext("1", "anonymous", List.of());
+        UserContextHolder.set(anonymousUser);
+
+        // When
+        List<String> result = noteService.findAll();
+
+        // Then
+        assertEquals(emptyList(), result);
+        verify(repository, never()).findAllByCreatedBy(anyString());
+    }
+
+    @Test
+    void findAll_withAuthenticatedUserNoNotes_shouldReturnEmptyList() {
+        // Given
+        when(repository.findAllByCreatedBy(testUserId)).thenReturn(emptyList());
+
+        // When
+        List<String> result = noteService.findAll();
+
+        // Then
+        assertEquals(emptyList(), result);
+        verify(repository).findAllByCreatedBy(testUserId);
     }
 }
