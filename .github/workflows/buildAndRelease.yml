@@ -66,3 +66,11 @@ jobs:
         run: |
           docker buildx create --use
           docker buildx build --platform linux/amd64,linux/arm64 -t lhamacorp/knotes-be:latest --push .
+
+  deploy:
+    name: Deploy
+    needs: dockerize
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Portainer Webhook
+        run: curl --location --request POST '${{ secrets.DEPLOY_WEBHOOK }}'
