@@ -27,10 +27,10 @@ public class CleanupScheduler {
     @Scheduled(cron = ONCE_PER_DAY_AT_2AM)
     public void cleanup() {
         List<String> ids = repository.findEmptyNotes()
-            .stream()
-            .filter(note -> note.createdAt().isBefore(now().minus(1, DAYS)))
-            .map(Note::id)
-            .toList();
+                .stream()
+                .filter(note -> note.createdAt().isBefore(now().minus(1, DAYS)))
+                .map(Note::id)
+                .toList();
 
         if (!ids.isEmpty()) {
             log.info("Cleaning empty notes [{}]", ids);
