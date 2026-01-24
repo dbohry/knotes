@@ -17,7 +17,7 @@ import java.util.List;
 import static com.lhamacorp.knotes.context.UserContextHolder.isAuthenticated;
 import static com.lhamacorp.knotes.domain.EncryptionMode.PRIVATE;
 import static com.lhamacorp.knotes.domain.EncryptionMode.PUBLIC;
-import static org.springframework.http.HttpStatus.UNAUTHORIZED;
+import static org.springframework.http.HttpStatus.*;
 import static org.springframework.http.ResponseEntity.badRequest;
 import static org.springframework.http.ResponseEntity.ok;
 
@@ -39,22 +39,21 @@ public class NoteController {
         return ok(service.findAll());
     }
 
-    @GetMapping("{id}")
-    public ResponseEntity<NoteResponse> find(@PathVariable String id,
-                                             @RequestParam(required = false) String password) {
+    @GetMapping("/{id}")
+    public ResponseEntity<NoteResponse> findById(@PathVariable String id,
+                                                 @RequestParam(required = false) String password) {
         UserContext user = UserContextHolder.get();
         Note note = service.findById(id);
 
-        if (!note.createdBy().equals(ANONYMOUS) && !note.createdBy().equals(user.id())) {
-            return ResponseEntity.status(UNAUTHORIZED).build();
+        if (!canAccess(note, user.id(), password)) {
+            return ResponseEntity.status(FORBIDDEN).build();
         }
 
-        EncryptionMode mode = note.encryptionMode() != null ? note.encryptionMode() : PUBLIC;
-
-        return switch (mode) {
-            case PRIVATE -> ok().body(NoteResponse.fromPrivate(note, user.id()));
-            case PASSWORD_SHARED -> ok().body(NoteResponse.fromPasswordShared(note, password));
-            case PUBLIC -> ok().body(NoteResponse.from(note));
+        return switch (note.encryptionMode()) {
+            case PRIVATE -> ResponseEntity.ok(NoteResponse.fromPrivate(note, user.id()));
+            case PASSWORD_SHARED -> ResponseEntity.ok(NoteResponse.fromPasswordShared(note, password));
+            case PUBLIC -> ResponseEntity.ok(NoteResponse.from(note));
+            default -> ResponseEntity.status(INTERNAL_SERVER_ERROR).build();
         };
     }
 
@@ -116,6 +115,14 @@ public class NoteController {
         }
 
         return ok().build();
+    }
+
+    private boolean canAccess(Note note, String userId, String password) {
+        return switch (note.encryptionMode()) {
+            case PUBLIC -> true;
+            case PRIVATE -> ANONYMOUS.equals(note.createdBy()) || userId.equals(note.createdBy());
+            default -> false;
+        };
     }
 
 }
