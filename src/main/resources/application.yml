@@ -8,3 +8,6 @@ spring:
 
 auth:
   api: ${auth_api:}
+
+encryption:
+  key: ${encryption_key:}

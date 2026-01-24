@@ -9,7 +9,7 @@ import java.util.zip.GZIPOutputStream;
 
 /**
  * Utility class for GZIP compression and decompression of text content.
- * Provides transparent compression for note content to reduce database storage size.
+ * Provides transparent compression for content content to reduce database storage size.
  */
 public class CompressionUtils {
 

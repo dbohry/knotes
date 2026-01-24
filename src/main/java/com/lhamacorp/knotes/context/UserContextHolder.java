@@ -12,6 +12,10 @@ public class UserContextHolder {
         return CONTEXT.get();
     }
 
+    public static boolean isAuthenticated() {
+        return CONTEXT.get().roles().contains("USER");
+    }
+
     public static void clear() {
         CONTEXT.remove();
     }

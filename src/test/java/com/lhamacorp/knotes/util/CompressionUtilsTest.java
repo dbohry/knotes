@@ -9,7 +9,7 @@ class CompressionUtilsTest {
     @Test
     void compressAndDecompress_shouldReturnOriginalText() {
         // Given
-        String originalText = "This is a test note with some content that should compress well. " +
+        String originalText = "This is a test content with some content that should compress well. " +
                              "This is repeated text. This is repeated text. This is repeated text.";
 
         // When
@@ -86,7 +86,7 @@ class CompressionUtilsTest {
     @Test
     void compress_largeRepeatingText_shouldAchieveHighCompressionRatio() {
         // Given - Large text with lots of repetition (typical of notes with repeated patterns)
-        String pattern = "This is a repeated pattern in a note that demonstrates compression. ";
+        String pattern = "This is a repeated pattern in a content that demonstrates compression. ";
         String largeText = pattern.repeat(50);
 
         // When
@@ -117,7 +117,7 @@ class CompressionUtilsTest {
                 "dark_mode": true,
                 "auto_save": true
               },
-              "description": "A note-taking application with GZIP compression",
+              "description": "A content-taking application with GZIP compression",
               "metadata": {
                 "created": "2024",
                 "author": "Developer",
