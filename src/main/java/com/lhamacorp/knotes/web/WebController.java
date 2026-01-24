@@ -23,7 +23,7 @@ public class WebController {
     }
 
     /**
-     * Handle note ID paths by serving the index.html file
+     * Handle content ID paths by serving the index.html file
      * Matches any alphanumeric ID and forwards to 404 if not found
      */
     @GetMapping("/{noteId:[A-Za-z0-9]+}")

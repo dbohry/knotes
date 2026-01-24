@@ -11,6 +11,8 @@ import org.springframework.web.client.RestTemplate;
 import java.util.List;
 import java.util.Map;
 
+import static org.springframework.http.HttpMethod.GET;
+
 @Component
 public class AuthClient {
 
@@ -30,7 +32,7 @@ public class AuthClient {
         HttpEntity<Map<String, String>> entity = new HttpEntity<>(null, headers);
 
         try {
-            ResponseEntity<CurrentUser> response = rest.exchange(baseUrl + "/users/current", HttpMethod.GET, entity, CurrentUser.class);
+            ResponseEntity<CurrentUser> response = rest.exchange(baseUrl + "/users/current", GET, entity, CurrentUser.class);
 
             if (response.getStatusCode() == HttpStatus.OK) {
                 return response.getBody();
