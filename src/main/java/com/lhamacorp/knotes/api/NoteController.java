@@ -9,6 +9,7 @@ import com.lhamacorp.knotes.context.UserContextHolder;
 import com.lhamacorp.knotes.domain.EncryptionMode;
 import com.lhamacorp.knotes.domain.Note;
 import com.lhamacorp.knotes.service.NoteService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,8 +18,7 @@ import java.util.List;
 import static com.lhamacorp.knotes.context.UserContextHolder.isAuthenticated;
 import static com.lhamacorp.knotes.domain.EncryptionMode.PRIVATE;
 import static com.lhamacorp.knotes.domain.EncryptionMode.PUBLIC;
-import static org.springframework.http.ResponseEntity.badRequest;
-import static org.springframework.http.ResponseEntity.ok;
+import static org.springframework.http.ResponseEntity.*;
 
 @RestController
 @RequestMapping("api/notes")
@@ -41,6 +41,10 @@ public class NoteController {
                                              @RequestParam(required = false) String password) {
         UserContext user = UserContextHolder.get();
         Note note = service.findById(id);
+
+        if (!note.createdBy().equals("1") && !note.createdBy().equals(user.id())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
 
         EncryptionMode mode = note.encryptionMode() != null ? note.encryptionMode() : PUBLIC;
 
