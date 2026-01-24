@@ -8,6 +8,7 @@ import java.time.Instant;
 public record NoteResponse(
         String id,
         String content,
+        String createdBy,
         Instant createdAt,
         Instant modifiedAt,
         EncryptionMode encryptionMode,
@@ -18,6 +19,7 @@ public record NoteResponse(
         return new NoteResponse(
                 note.id(),
                 note.content(),
+                note.createdBy(),
                 note.createdAt(),
                 note.modifiedAt(),
                 note.encryptionMode() != null ? note.encryptionMode() : EncryptionMode.PUBLIC,
@@ -29,6 +31,7 @@ public record NoteResponse(
         return new NoteResponse(
                 note.id(),
                 note.content(requestingUserId, null),
+                note.createdBy(),
                 note.createdAt(),
                 note.modifiedAt(),
                 note.encryptionMode() != null ? note.encryptionMode() : EncryptionMode.PUBLIC,
@@ -40,6 +43,7 @@ public record NoteResponse(
         return new NoteResponse(
                 note.id(),
                 note.content(null, password),
+                note.createdBy(),
                 note.createdAt(),
                 note.modifiedAt(),
                 note.encryptionMode() != null ? note.encryptionMode() : EncryptionMode.PUBLIC,
@@ -51,6 +55,7 @@ public record NoteResponse(
         return new NoteResponse(
                 note.id(),
                 note.content(requestingUserId, password),
+                note.createdBy(),
                 note.createdAt(),
                 note.modifiedAt(),
                 note.encryptionMode() != null ? note.encryptionMode() : EncryptionMode.PUBLIC,
