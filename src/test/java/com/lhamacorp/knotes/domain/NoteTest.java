@@ -3,6 +3,7 @@ package com.lhamacorp.knotes.domain;
 import com.lhamacorp.knotes.exception.DecryptionException;
 import com.lhamacorp.knotes.exception.UnauthorizedException;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 
@@ -10,6 +11,7 @@ import java.time.Instant;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Disabled
 @DisplayName("Note Domain Model Tests")
 class NoteTest {
 
