@@ -102,4 +102,13 @@ public class NoteController {
         };
     }
 
+    @DeleteMapping("{id}")
+    public ResponseEntity<Void> delete(@PathVariable String id) {
+        if (isAuthenticated()) {
+            service.delete(id);
+        }
+
+        return ok().build();
+    }
+
 }

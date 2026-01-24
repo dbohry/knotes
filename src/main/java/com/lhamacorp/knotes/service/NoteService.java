@@ -89,8 +89,18 @@ public class NoteService {
 
     @CacheEvict(value = {"content", "metadata"}, key = "#id")
     public Note update(String id, String content) {
-        Note existingNote = repository.findById(id).orElseThrow(() -> new NotFoundException(NOT_FOUND));
-        return update(id, content, existingNote.encryptionMode(), null);
+        Note note = repository.findById(id).orElseThrow(() -> new NotFoundException(NOT_FOUND));
+        return update(id, content, note.encryptionMode(), null);
+    }
+
+    public void delete(String id) {
+        Note note = repository.findById(id).orElseThrow(() -> new NotFoundException("Note not found"));
+        String userId = UserContextHolder.get().id();
+
+        if (note.createdBy().equals(userId)) {
+            repository.deleteById(note.id());
+        }
+
     }
 
 }
