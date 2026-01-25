@@ -17,8 +17,10 @@ import java.time.Instant;
 import java.util.List;
 
 import static com.github.f4b6a3.ulid.UlidCreator.getUlid;
+import static com.lhamacorp.knotes.api.dto.NoteMetadata.from;
 import static com.lhamacorp.knotes.domain.EncryptionMode.PRIVATE;
 import static com.lhamacorp.knotes.domain.EncryptionMode.PUBLIC;
+import static com.lhamacorp.knotes.domain.Note.ANONYMOUS;
 import static java.time.Instant.now;
 import static java.util.Collections.emptyList;
 
@@ -39,8 +41,7 @@ public class NoteService {
 
     public List<String> findAll() {
         UserContext user = UserContextHolder.get();
-
-        return "1".equals(user.id())
+        return ANONYMOUS.equals(user.id())
                 ? emptyList()
                 : repository.findAllByCreatedBy(user.id()).stream().map(Note::id).toList();
     }
@@ -55,14 +56,14 @@ public class NoteService {
     public NoteMetadata findMetadataById(String id) {
         Note noteProjection = repository.findMetadataById(id)
                 .orElseThrow(() -> new NotFoundException(NOT_FOUND));
-        return NoteMetadata.from(noteProjection);
+        return from(noteProjection);
     }
 
     public Note save(String content, EncryptionMode encryptionMode) {
         Ulid id = getUlid();
         UserContext user = UserContextHolder.get();
-
         Instant now = now();
+
         return repository.save(new Note(id.toString(), content, user.id(), now, now, encryptionMode, null));
     }
 
@@ -75,7 +76,7 @@ public class NoteService {
             throw new UnauthorizedException("Not authorized to update this content");
         }
 
-        if ("1".equals(user.id())) {
+        if (ANONYMOUS.equals(user.id())) {
             encryptionMode = PUBLIC;
             password = null;
         }
@@ -85,12 +86,6 @@ public class NoteService {
         }
 
         return repository.save(new Note(id, content, existingNote.createdBy(), existingNote.createdAt(), now(), encryptionMode, password));
-    }
-
-    @CacheEvict(value = {"content", "metadata"}, key = "#id")
-    public Note update(String id, String content) {
-        Note note = repository.findById(id).orElseThrow(() -> new NotFoundException(NOT_FOUND));
-        return update(id, content, note.encryptionMode(), null);
     }
 
     @CacheEvict(value = {"content", "metadata"}, key = "#id")

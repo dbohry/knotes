@@ -226,7 +226,7 @@ class NoteServiceTest {
         when(repository.save(any(Note.class))).thenReturn(updatedNote);
 
         // When
-        Note result = noteService.update(testId, updatedContent);
+        Note result = noteService.update(testId, updatedContent, null, null);
 
         // Then
         assertEquals(updatedNote, result);
@@ -248,7 +248,7 @@ class NoteServiceTest {
 
         // When & Then
         NotFoundException exception = assertThrows(NotFoundException.class,
-            () -> noteService.update(testId, updatedContent));
+            () -> noteService.update(testId, updatedContent, null, null));
 
         assertEquals("Note not found!", exception.getMessage());
         verify(repository).findById(testId);
@@ -265,7 +265,7 @@ class NoteServiceTest {
         when(repository.save(any(Note.class))).thenReturn(updatedNote);
 
         // When
-        Note result = noteService.update(testId, null);
+        Note result = noteService.update(testId, null, null, null);
 
         // Then
         assertEquals(updatedNote, result);
