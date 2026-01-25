@@ -24,22 +24,29 @@ public record Note(
         @Field("salt") Binary encryptionSalt,
         Boolean requiresPassword
 ) {
+
+    public static final String ANONYMOUS = "1";
+
     public Note(String id, String content, String createdBy, Instant createdAt, Instant modifiedAt) {
         this(id, content, createdBy, createdAt, modifiedAt, PUBLIC, null);
     }
 
     public Note(String id, String content, String createdBy, Instant createdAt, Instant modifiedAt, EncryptionMode encryptionMode, String password) {
-        EncryptionMode finalMode = encryptionMode != null ? encryptionMode : PUBLIC;
+        EncryptionMode mode = encryptionMode != null ? encryptionMode : PUBLIC;
+
+        if (createdBy == null || createdBy.equals(ANONYMOUS)) {
+            mode = PUBLIC;
+        }
 
         byte[] salt = null;
-        if (finalMode != PUBLIC) {
+        if (mode != PUBLIC) {
             salt = EncryptionUtils.generateSalt();
         }
 
-        Binary processedContent = processContent(content, finalMode, createdBy, password, salt);
+        Binary processedContent = processContent(content, mode, createdBy, password, salt);
         Binary storedSalt = salt != null ? new Binary(salt) : null;
 
-        this(id, processedContent, createdBy, createdAt, modifiedAt, finalMode, storedSalt, finalMode == EncryptionMode.PASSWORD_SHARED);
+        this(id, processedContent, createdBy, createdAt, modifiedAt, mode, storedSalt, mode == EncryptionMode.PASSWORD_SHARED);
     }
 
     public String content() {

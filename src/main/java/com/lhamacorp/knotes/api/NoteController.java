@@ -17,7 +17,9 @@ import java.util.List;
 import static com.lhamacorp.knotes.context.UserContextHolder.isAuthenticated;
 import static com.lhamacorp.knotes.domain.EncryptionMode.PRIVATE;
 import static com.lhamacorp.knotes.domain.EncryptionMode.PUBLIC;
-import static org.springframework.http.HttpStatus.*;
+import static com.lhamacorp.knotes.domain.Note.ANONYMOUS;
+import static org.springframework.http.HttpStatus.FORBIDDEN;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.ResponseEntity.badRequest;
 import static org.springframework.http.ResponseEntity.ok;
 
@@ -27,8 +29,6 @@ import static org.springframework.http.ResponseEntity.ok;
 public class NoteController {
 
     private final NoteService service;
-
-    private static final String ANONYMOUS = "1";
 
     public NoteController(NoteService service) {
         this.service = service;

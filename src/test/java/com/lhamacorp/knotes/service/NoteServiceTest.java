@@ -53,8 +53,6 @@ class NoteServiceTest {
         testCreatedAt = Instant.parse("2024-01-01T10:00:00Z");
         testModifiedAt = Instant.parse("2024-01-01T11:00:00Z");
         testNote = new Note(testId, testContent, testUserId, testCreatedAt, testModifiedAt);
-
-        // Set up UserContext for all tests
         testUserContext = new UserContext(testUserId, "testuser", List.of("USER"));
         UserContextHolder.set(testUserContext);
     }

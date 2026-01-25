@@ -3,15 +3,13 @@ package com.lhamacorp.knotes.domain;
 import com.lhamacorp.knotes.exception.DecryptionException;
 import com.lhamacorp.knotes.exception.UnauthorizedException;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@Disabled
 @DisplayName("Note Domain Model Tests")
 class NoteTest {
 
@@ -22,11 +20,8 @@ class NoteTest {
 
     @BeforeEach
     void setUp() {
-        // Set up test key for encryption tests
         System.setProperty("knotes.encryption.key", TEST_KEY);
     }
-
-    // ===== EXISTING TESTS (Backward Compatibility) =====
 
     @Test
     @DisplayName("Constructor with string content should compress and store (backward compatibility)")
@@ -87,8 +82,6 @@ class NoteTest {
         assertEquals(originalContent, retrievedContent);
     }
 
-    // ===== NEW ENCRYPTION TESTS =====
-
     @Test
     @DisplayName("Should create PUBLIC content with no encryption (default)")
     void constructor_withPublicMode_shouldNotEncrypt() {
@@ -133,7 +126,6 @@ class NoteTest {
 
         // Verify content is actually encrypted (compressed data should be different from original)
         assertNotNull(note.compressedData());
-        // The encrypted data will be longer than just compressed data due to IV + auth tag
     }
 
     @Test
@@ -269,7 +261,7 @@ class NoteTest {
 
         // Create a corrupted content - copy the encrypted data but remove the salt (simulating corruption)
         Note corruptedNote = new Note(id, validNote.compressedData(), TEST_USER_ID, now, now,
-                                      EncryptionMode.PRIVATE, null, false);
+                EncryptionMode.PRIVATE, null, false);
 
         // When & Then
         DecryptionException exception = assertThrows(DecryptionException.class, () -> {
