@@ -5,7 +5,7 @@ import com.lhamacorp.knotes.context.UserContext;
 import com.lhamacorp.knotes.context.UserContextHolder;
 import com.lhamacorp.knotes.domain.EncryptionMode;
 import com.lhamacorp.knotes.domain.Note;
-import com.lhamacorp.knotes.exception.NotFoundException;
+import com.lhamacorp.knotes.exception.BadRequestException;
 import com.lhamacorp.knotes.repository.NoteRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -112,7 +112,7 @@ class NoteServiceTest {
         when(repository.findById(testId)).thenReturn(Optional.empty());
 
         // When & Then
-        NotFoundException exception = assertThrows(NotFoundException.class,
+        BadRequestException exception = assertThrows(BadRequestException.class,
             () -> noteService.findById(testId));
 
         assertEquals("Note not found!", exception.getMessage());
@@ -141,7 +141,7 @@ class NoteServiceTest {
         when(repository.findMetadataById(testId)).thenReturn(Optional.empty());
 
         // When & Then
-        NotFoundException exception = assertThrows(NotFoundException.class,
+        BadRequestException exception = assertThrows(BadRequestException.class,
             () -> noteService.findMetadataById(testId));
 
         assertEquals("Note not found!", exception.getMessage());
@@ -247,7 +247,7 @@ class NoteServiceTest {
         when(repository.findById(testId)).thenReturn(Optional.empty());
 
         // When & Then
-        NotFoundException exception = assertThrows(NotFoundException.class,
+        BadRequestException exception = assertThrows(BadRequestException.class,
             () -> noteService.update(testId, updatedContent, null, null));
 
         assertEquals("Note not found!", exception.getMessage());

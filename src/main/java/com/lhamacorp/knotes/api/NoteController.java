@@ -19,7 +19,6 @@ import static com.lhamacorp.knotes.domain.EncryptionMode.PRIVATE;
 import static com.lhamacorp.knotes.domain.EncryptionMode.PUBLIC;
 import static com.lhamacorp.knotes.domain.Note.ANONYMOUS;
 import static org.springframework.http.HttpStatus.FORBIDDEN;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.ResponseEntity.badRequest;
 import static org.springframework.http.ResponseEntity.ok;
 
@@ -28,22 +27,23 @@ import static org.springframework.http.ResponseEntity.ok;
 @CrossOrigin(origins = "*")
 public class NoteController {
 
-    private final NoteService service;
+    private final NoteService noteService;
 
-    public NoteController(NoteService service) {
-        this.service = service;
+
+    public NoteController(NoteService noteService) {
+        this.noteService = noteService;
     }
 
     @GetMapping
     public ResponseEntity<List<String>> findByUserId() {
-        return ok(service.findAll());
+        return ok(noteService.findAll());
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<NoteResponse> findById(@PathVariable String id,
                                                  @RequestParam(required = false) String password) {
         UserContext user = UserContextHolder.get();
-        Note note = service.findById(id);
+        Note note = noteService.findById(id);
 
         if (!canAccess(note, user.id(), password)) {
             return ResponseEntity.status(FORBIDDEN).build();
@@ -53,13 +53,12 @@ public class NoteController {
             case PRIVATE -> ResponseEntity.ok(NoteResponse.fromPrivate(note, user.id()));
             case PASSWORD_SHARED -> ResponseEntity.ok(NoteResponse.fromPasswordShared(note, password));
             case PUBLIC -> ResponseEntity.ok(NoteResponse.from(note));
-            default -> ResponseEntity.status(INTERNAL_SERVER_ERROR).build();
         };
     }
 
     @GetMapping("{id}/metadata")
     public ResponseEntity<NoteMetadata> getMetadata(@PathVariable String id) {
-        NoteMetadata metadata = service.findMetadataById(id);
+        NoteMetadata metadata = noteService.findMetadataById(id);
         return ok().body(metadata);
     }
 
@@ -84,7 +83,7 @@ public class NoteController {
             }
         }
 
-        Note updatedNote = service.update(id, request.content(), mode, password);
+        Note updatedNote = noteService.update(id, request.content(), mode, password);
         EncryptionMode finalMode = updatedNote.encryptionMode() != null ? updatedNote.encryptionMode() : PUBLIC;
 
         return switch (finalMode) {
@@ -99,7 +98,7 @@ public class NoteController {
         String userId = isAuthenticated() ? UserContextHolder.get().id() : ANONYMOUS;
 
         EncryptionMode mode = userId.equals(ANONYMOUS) ? PUBLIC : PRIVATE;
-        Note savedNote = service.save(request.note(), mode);
+        Note savedNote = noteService.save(request.note(), mode);
 
         return switch (mode) {
             case PRIVATE -> ok().body(NoteResponse.fromPrivate(savedNote, userId));
@@ -111,7 +110,7 @@ public class NoteController {
     @DeleteMapping("{id}")
     public ResponseEntity<Void> delete(@PathVariable String id) {
         if (isAuthenticated()) {
-            service.delete(id);
+            noteService.delete(id);
         }
 
         return ok().build();

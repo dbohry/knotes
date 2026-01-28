@@ -6,7 +6,7 @@ import com.lhamacorp.knotes.context.UserContext;
 import com.lhamacorp.knotes.context.UserContextHolder;
 import com.lhamacorp.knotes.domain.EncryptionMode;
 import com.lhamacorp.knotes.domain.Note;
-import com.lhamacorp.knotes.exception.NotFoundException;
+import com.lhamacorp.knotes.exception.BadRequestException;
 import com.lhamacorp.knotes.exception.UnauthorizedException;
 import com.lhamacorp.knotes.repository.NoteRepository;
 import org.springframework.cache.annotation.CacheEvict;
@@ -39,6 +39,10 @@ public class NoteService {
         return repository.existsById(id);
     }
 
+    public Note get(String id) {
+        return repository.findById(id).orElseThrow(() -> new BadRequestException("Note not found"));
+    }
+
     public List<String> findAll() {
         UserContext user = UserContextHolder.get();
         return ANONYMOUS.equals(user.id())
@@ -49,13 +53,13 @@ public class NoteService {
     @Cacheable(value = "content", key = "#id")
     public Note findById(String id) {
         return repository.findById(id)
-                .orElseThrow(() -> new NotFoundException(NOT_FOUND));
+                .orElseThrow(() -> new BadRequestException(NOT_FOUND));
     }
 
     @Cacheable(value = "metadata", key = "#id")
     public NoteMetadata findMetadataById(String id) {
         Note noteProjection = repository.findMetadataById(id)
-                .orElseThrow(() -> new NotFoundException(NOT_FOUND));
+                .orElseThrow(() -> new BadRequestException(NOT_FOUND));
         return from(noteProjection);
     }
 
@@ -69,7 +73,7 @@ public class NoteService {
 
     @CacheEvict(value = {"content", "metadata"}, key = "#id")
     public Note update(String id, String content, EncryptionMode encryptionMode, String password) {
-        Note existingNote = repository.findById(id).orElseThrow(() -> new NotFoundException(NOT_FOUND));
+        Note existingNote = repository.findById(id).orElseThrow(() -> new BadRequestException(NOT_FOUND));
         UserContext user = UserContextHolder.get();
 
         if (existingNote.encryptionMode() == PRIVATE && !existingNote.createdBy().equals(user.id())) {
@@ -90,7 +94,7 @@ public class NoteService {
 
     @CacheEvict(value = {"content", "metadata"}, key = "#id")
     public void delete(String id) {
-        Note note = repository.findById(id).orElseThrow(() -> new NotFoundException("Note not found"));
+        Note note = repository.findById(id).orElseThrow(() -> new BadRequestException("Note not found"));
         String userId = UserContextHolder.get().id();
 
         if (note.createdBy().equals(userId)) {
