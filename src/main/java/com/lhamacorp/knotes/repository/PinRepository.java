@@ -9,6 +9,8 @@ public interface PinRepository extends MongoRepository<Pin, String> {
 
     List<Pin> findAllByUserId(String userId);
 
+    List<Pin> findAllByNoteId(String noteId);
+
     void deleteAllByNoteId(String noteId);
 
     void deletePinByUserIdAndNoteId(String noteId, String userId);
